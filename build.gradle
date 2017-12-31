@@ -25,6 +25,7 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     compile 'com.pi4j:pi4j-core:1.1'
+    compile 'org.influxdb:influxdb-java:2.8'
     compile 'com.github.kaklakariada:fritzbox-java-api:0.4.1'
     compile 'org.slf4j:slf4j-api:1.7.22'
     compile 'ch.qos.logback:logback-classic:1.1.8'
@@ -47,8 +48,7 @@ task deploy(dependsOn: shadowJar) {
       session(remotes.raspi) {
         def file = shadowJar.outputs.files.singleFile
         put from: file, into: '/home/pi'
-        def result = execute "java -jar /home/pi/${file.name}"
-        logger.info result
+        execute "java -jar /home/pi/${file.name}"
       }
     }
   }
