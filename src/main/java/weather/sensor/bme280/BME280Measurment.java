@@ -35,8 +35,10 @@ public class BME280Measurment {
 	@Override
 	public String toString() {
 		final NumberFormat numberFormat = NumberFormat.getNumberInstance();
-		return "temp: " + numberFormat.format(temp) + "°C, humidity: " + numberFormat.format(humidity)
-				+ "% RH, pressure: " + numberFormat.format(pressure) + "hPa";
+		numberFormat.setMaximumFractionDigits(2);
+		numberFormat.setMinimumIntegerDigits(2);
+		return "BME280Measurment [timestamp=" + timestamp + ", temp=" + numberFormat.format(temp) + ", humidity="
+				+ numberFormat.format(humidity) + ", pressure="
+				+ numberFormat.format(pressure) + "]";
 	}
-
 }
