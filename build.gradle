@@ -26,6 +26,7 @@ tasks.withType(JavaCompile) {
 dependencies {
     compile 'com.pi4j:pi4j-core:1.1'
     compile 'org.influxdb:influxdb-java:2.8'
+    compile 'com.netflix.hystrix:hystrix-core:1.5.12'
     compile 'com.github.kaklakariada:fritzbox-java-api:0.4.1'
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'ch.qos.logback:logback-classic:1.2.3'
