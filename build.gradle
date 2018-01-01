@@ -63,7 +63,7 @@ task deployAndRun(dependsOn: deploy) {
   doLast {
     ssh.run {
       session(remotes.raspi) {
-        def jarFileName = shadowJar.outputs.files.singleFileName
+        def jarFileName = shadowJar.outputs.files.singleFile.name
         execute "cd $uploadDir && java -jar ${uploadDir}/${jarFileName}"
       }
     }

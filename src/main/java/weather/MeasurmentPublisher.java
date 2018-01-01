@@ -33,6 +33,10 @@ public class MeasurmentPublisher<I, O> implements Runnable {
 	@Override
 	public void run() {
 		final I value = supplier.get();
+		if (value == null) {
+			LOG.warn("Got null from supplier {}: ignore", supplier);
+			return;
+		}
 		final O convertedValue = converter.apply(value);
 		LOG.debug("Publishing {}", value);
 		consumer.accept(convertedValue);

@@ -16,7 +16,6 @@ import weather.upload.InfluxService;
 public class WeatherStation {
 
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException, InterruptedException {
-
 		final WeatherStationConfig config = WeatherStationConfig.read();
 		final BME280 bme280 = BME280.create(config.getBME280I2CBusNumber(), config.getBME280I2CDeviceAddress());
 		final FritzDectService fritzDectService = FritzDectService.create(config.getFritzBoxUrl(),
@@ -32,6 +31,6 @@ public class WeatherStation {
 				new FritzDectConverter(), influxService, "fritzdect");
 
 		scheduledThreadPool.scheduleAtFixedRate(bme280Publisher, 0, 3, TimeUnit.SECONDS);
-		scheduledThreadPool.scheduleAtFixedRate(fritzDectPublisher, 0, 3, TimeUnit.SECONDS);
+		scheduledThreadPool.scheduleAtFixedRate(fritzDectPublisher, 2, 5, TimeUnit.SECONDS);
 	}
 }
