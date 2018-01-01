@@ -14,7 +14,7 @@ public class InfluxService {
 	private static final Logger LOG = LoggerFactory.getLogger(InfluxService.class);
 
 	private static final String DEFAULT_RETENTION_POLICY = "autogen";
-	private static final int DB_WRITE_TIMEOUT_MILLIS = 2000;
+	private static final int DB_WRITE_TIMEOUT_MILLIS = 5 * 1000;
 	private final InfluxDB influxDB;
 
 	InfluxService(InfluxDB influxDB) {

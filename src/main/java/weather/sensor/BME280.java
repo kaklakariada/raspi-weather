@@ -1,6 +1,8 @@
 package weather.sensor;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +18,16 @@ public class BME280 {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BME280.class);
 	private final I2CDevice device;
+	private final Clock clock;
 
-	public BME280(I2CDevice device) {
+	BME280(I2CDevice device, Clock clock) {
 		this.device = device;
+		this.clock = clock;
 	}
 
 	public static BME280 create(int busNumber, int deviceAddress) {
 		final I2CDevice device = getDevice(busNumber, deviceAddress);
-		return new BME280(device);
+		return new BME280(device, Clock.systemUTC());
 	}
 
 	private static I2CDevice getDevice(int busNumber, int deviceAddress) {
@@ -46,6 +50,9 @@ public class BME280 {
 	}
 
 	private BME280Measurment readInternal() throws IOException {
+
+		final Instant timestamp = clock.instant();
+
 		// Read 24 bytes of data from address 0x88(136)
 		final byte[] b1 = new byte[24];
 		device.read(0x88, b1, 0, 24);
@@ -177,6 +184,6 @@ public class BME280 {
 			humidity = 0.0;
 		}
 
-		return new BME280Measurment(cTemp, humidity, pressure);
+		return new BME280Measurment(timestamp, cTemp, humidity, pressure);
 	}
 }
