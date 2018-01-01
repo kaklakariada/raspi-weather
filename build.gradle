@@ -47,9 +47,13 @@ task deploy(dependsOn: shadowJar) {
   doLast {
     ssh.run {
       session(remotes.raspi) {
-        def file = shadowJar.outputs.files.singleFile
-        put from: file, into: '/home/pi'
-        execute "java -jar /home/pi/${file.name}"
+        def jarFile = shadowJar.outputs.files.singleFile
+        def configFile = file('weather.properties')
+        def uploadDir = '/home/pi/weather'
+        execute "mkdir -p $uploadDir"
+        put from: jarFile, into: uploadDir
+        put from: configFile, into: uploadDir
+        execute "java -jar ${uploadDir}/${jarFile.name}"
       }
     }
   }
