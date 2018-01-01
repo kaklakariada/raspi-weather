@@ -1,8 +1,11 @@
 package weather.upload;
 
+import java.util.Collection;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +40,12 @@ public class InfluxService {
 		return InfluxDBFactory.connect(url, username, password);
 	}
 
-	public void write(String database, Point point) {
-		new WriteDbCommand(influxDB, database, point)
+	public void write(String database, Collection<Point> points) {
+		new WriteDbCommand(influxDB, database, points)
 				.observe()
 				.subscribe(
-						result -> LOG.trace("Successfully wrote {} to db {}: {}", point, database, result),
+						result -> LOG.trace("Successfully wrote {} points to db {}: {}", points.size(), database,
+								result),
 						exception -> LOG.warn("Writing to db '" + database + "' failed: " + exception.getMessage(),
 								exception));
 	}
@@ -50,20 +54,22 @@ public class InfluxService {
 
 		private final InfluxDB influxDB;
 		private final String database;
-		private final Point point;
+		private final Collection<Point> points;
 
-		private WriteDbCommand(InfluxDB influxDB, String database, Point point) {
+		private WriteDbCommand(InfluxDB influxDB, String database, Collection<Point> points) {
 			super(HystrixCommandGroupKey.Factory.asKey("influxdb"), DB_WRITE_TIMEOUT_MILLIS);
 			this.influxDB = influxDB;
 			this.database = database;
-			this.point = point;
+			this.points = points;
 		}
 
 		@Override
 		protected Void run() throws Exception {
-			LOG.trace("Writing point to db {}...", database);
-			influxDB.write(database, DEFAULT_RETENTION_POLICY, point);
-			LOG.trace("Wrote point to db {} successfully", database);
+			LOG.trace("Writing {} points to db {}...", points.size(), database);
+			final BatchPoints batch = BatchPoints.database(database).retentionPolicy(DEFAULT_RETENTION_POLICY).build();
+			points.forEach(batch::point);
+			influxDB.write(batch);
+			LOG.trace("Wrote {} points to db {} successfully", batch.getPoints().size(), database);
 			return null;
 		}
 	}

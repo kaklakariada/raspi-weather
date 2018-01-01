@@ -1,0 +1,10 @@
+rootProject.name='raspi-weather'
+
+def includeSubProject(String path) {
+  File dir = new File(path).getAbsoluteFile()
+  if(dir.exists()) {
+    includeBuild dir
+  }
+}
+
+includeSubProject '../fritzbox-java-api'

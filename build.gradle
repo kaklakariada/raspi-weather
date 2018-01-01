@@ -53,7 +53,7 @@ task deploy(dependsOn: shadowJar) {
         execute "mkdir -p $uploadDir"
         put from: jarFile, into: uploadDir
         put from: configFile, into: uploadDir
-        execute "java -jar ${uploadDir}/${jarFile.name}"
+        execute "cd $uploadDir && java -jar ${uploadDir}/${jarFile.name}"
       }
     }
   }

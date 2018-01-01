@@ -1,5 +1,6 @@
 package weather;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -24,7 +25,7 @@ public class MeasurmentPublisher<I, O> implements Runnable {
 		this.consumer = consumer;
 	}
 
-	public static <I> Runnable influxDbPublisher(Supplier<I> supplier, Function<I, Point> converter,
+	public static <I> Runnable influxDbPublisher(Supplier<I> supplier, Function<I, Collection<Point>> converter,
 			InfluxService influx, String database) {
 		return new MeasurmentPublisher<>(supplier, converter, point -> influx.write(database, point));
 	}
