@@ -51,6 +51,18 @@ public class WeatherStationConfig {
 		return getValue("fritzbox.password");
 	}
 
+	public int getBME280I2CBusNumber() {
+		return getIntValue("bme280.bus");
+	}
+
+	public int getBME280I2CDeviceAddress() {
+		return getIntValue("bme280.device");
+	}
+
+	private int getIntValue(String propertyName) {
+		return Integer.parseInt(getValue(propertyName));
+	}
+
 	private String getValue(String propertyName) {
 		final String value = getOptionalValue(propertyName);
 		if (value == null) {
@@ -74,4 +86,5 @@ public class WeatherStationConfig {
 		}
 		return config;
 	}
+
 }

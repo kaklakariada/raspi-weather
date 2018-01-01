@@ -2,6 +2,9 @@ package weather.sensor;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
@@ -11,16 +14,27 @@ import weather.WeatherStationException;
 
 public class BME280 {
 
+	private static final Logger LOG = LoggerFactory.getLogger(BME280.class);
 	private final I2CDevice device;
 
 	public BME280(I2CDevice device) {
 		this.device = device;
 	}
 
-	public static BME280 create() throws UnsupportedBusNumberException, IOException {
-		final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
-		final I2CDevice device = bus.getDevice(0x76);
+	public static BME280 create(int busNumber, int deviceAddress) {
+		final I2CDevice device = getDevice(busNumber, deviceAddress);
 		return new BME280(device);
+	}
+
+	private static I2CDevice getDevice(int busNumber, int deviceAddress) {
+		LOG.info("Connecting to bus {} / device {}", busNumber, deviceAddress);
+		try {
+			final I2CBus bus = I2CFactory.getInstance(busNumber);
+			return bus.getDevice(deviceAddress);
+		} catch (UnsupportedBusNumberException | IOException e) {
+			throw new WeatherStationException(
+					"Error getting device " + deviceAddress + " on bus " + busNumber + ": " + e.getMessage(), e);
+		}
 	}
 
 	public BME280Measurment read() {

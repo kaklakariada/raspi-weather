@@ -21,8 +21,10 @@ public class WeatherStation {
 
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException, InterruptedException {
 
-		final BME280 bme280 = BME280.create();
-		final InfluxService influxService = InfluxService.create();
+		final WeatherStationConfig config = WeatherStationConfig.read();
+		final BME280 bme280 = BME280.create(config.getBME280I2CBusNumber(), config.getBME280I2CDeviceAddress());
+		final InfluxService influxService = InfluxService.create(config.getInfluxDbUrl(), config.getInfluxDbUser(),
+				config.getInfluxDbPassword());
 
 		final ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(2);
 

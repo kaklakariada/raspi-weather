@@ -5,3 +5,7 @@ influxdb.password =
 fritzbox.url = https://fritz.box
 fritzbox.user = user
 fritzbox.password = secret
+
+bme280.bus = 1
+# 0x76 = 118
+bme280.device = 118

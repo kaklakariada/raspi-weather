@@ -14,18 +14,27 @@ public class InfluxService {
 	private static final Logger LOG = LoggerFactory.getLogger(InfluxService.class);
 
 	private static final String DEFAULT_RETENTION_POLICY = "autogen";
+	private static final int DB_WRITE_TIMEOUT_MILLIS = 2000;
 	private final InfluxDB influxDB;
 
 	InfluxService(InfluxDB influxDB) {
 		this.influxDB = influxDB;
 	}
 
-	public static InfluxService create() {
-		final InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086")
+	public static InfluxService create(String url, String username, String password) {
+		LOG.info("Connecting to '{}' with user '{}'", url, username);
+		final InfluxDB influxDB = createDbConnection(url, username, password)
 				.enableGzip()
 				.setConsistency(ConsistencyLevel.QUORUM)
 				.setDatabase(null);
 		return new InfluxService(influxDB);
+	}
+
+	private static InfluxDB createDbConnection(String url, String username, String password) {
+		if (username == null || username.isEmpty()) {
+			return InfluxDBFactory.connect(url);
+		}
+		return InfluxDBFactory.connect(url, username, password);
 	}
 
 	public void write(String database, Point point) {
@@ -33,7 +42,7 @@ public class InfluxService {
 				.observe()
 				.subscribe(
 						result -> LOG.trace("Successfully wrote {} to db {}: {}", point, database, result),
-						exception -> LOG.warn("Writing to db " + database + " failed: " + exception.getMessage(),
+						exception -> LOG.warn("Writing to db '" + database + "' failed: " + exception.getMessage(),
 								exception));
 	}
 
@@ -44,7 +53,7 @@ public class InfluxService {
 		private final Point point;
 
 		private WriteDbCommand(InfluxDB influxDB, String database, Point point) {
-			super(HystrixCommandGroupKey.Factory.asKey("influxdb"));
+			super(HystrixCommandGroupKey.Factory.asKey("influxdb"), DB_WRITE_TIMEOUT_MILLIS);
 			this.influxDB = influxDB;
 			this.database = database;
 			this.point = point;
@@ -55,12 +64,6 @@ public class InfluxService {
 			LOG.trace("Writing point to db {}...", database);
 			influxDB.write(database, DEFAULT_RETENTION_POLICY, point);
 			LOG.trace("Wrote point to db {} successfully", database);
-			return null;
-		}
-
-		@Override
-		protected Void getFallback() {
-			LOG.warn("Writing to db {} failed for point {}: ignore", database, point);
 			return null;
 		}
 	}
