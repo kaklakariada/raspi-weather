@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-import weather.sensor.BME280;
-import weather.sensor.BME280Converter;
+import weather.sensor.bme280.BME280;
+import weather.sensor.bme280.BME280Converter;
 import weather.upload.InfluxService;
 
 public class WeatherStation {

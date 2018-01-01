@@ -1,4 +1,4 @@
-package weather.sensor;
+package weather.sensor.bme280;
 
 import java.io.IOException;
 import java.time.Clock;

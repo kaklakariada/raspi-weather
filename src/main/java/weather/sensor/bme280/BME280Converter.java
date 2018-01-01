@@ -1,4 +1,4 @@
-package weather.sensor;
+package weather.sensor.bme280;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
