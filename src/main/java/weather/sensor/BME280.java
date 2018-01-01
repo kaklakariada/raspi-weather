@@ -7,16 +7,31 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
+import weather.WeatherStationException;
+
 public class BME280 {
 
-	public static BME280 create() throws UnsupportedBusNumberException, IOException {
-		return new BME280();
+	private final I2CDevice device;
+
+	public BME280(I2CDevice device) {
+		this.device = device;
 	}
 
-	public BME280Measurment read() throws IOException, UnsupportedBusNumberException {
-
+	public static BME280 create() throws UnsupportedBusNumberException, IOException {
 		final I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
 		final I2CDevice device = bus.getDevice(0x76);
+		return new BME280(device);
+	}
+
+	public BME280Measurment read() {
+		try {
+			return readInternal();
+		} catch (final IOException e) {
+			throw new WeatherStationException("Error reading BME280 sensor: " + e.getMessage(), e);
+		}
+	}
+
+	private BME280Measurment readInternal() throws IOException {
 		// Read 24 bytes of data from address 0x88(136)
 		final byte[] b1 = new byte[24];
 		device.read(0x88, b1, 0, 24);

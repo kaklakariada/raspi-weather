@@ -29,7 +29,12 @@ public class InfluxService {
 	}
 
 	public void write(String database, Point point) {
-		new WriteDbCommand(influxDB, database, point).queue();
+		new WriteDbCommand(influxDB, database, point)
+				.observe()
+				.subscribe(
+						result -> LOG.trace("Successfully wrote {} to db {}: {}", point, database, result),
+						exception -> LOG.warn("Writing to db " + database + " failed: " + exception.getMessage(),
+								exception));
 	}
 
 	private static class WriteDbCommand extends HystrixCommand<Void> {

@@ -1,6 +1,8 @@
 package weather;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.influxdb.dto.Point;
@@ -22,20 +24,22 @@ public class WeatherStation {
 		final BME280 bme280 = BME280.create();
 		final InfluxService influxService = InfluxService.create();
 
-		while (true) {
-			final long timestamp = System.currentTimeMillis();
-			final BME280Measurment measurment = bme280.read();
+		final ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(2);
 
-			final Point point = Point.measurement("weather")
-					.time(timestamp, TimeUnit.MILLISECONDS)
-					.addField("temp", measurment.getTemp())
-					.addField("humidity", measurment.getHumidity())
-					.addField("pressure", measurment.getPressure())
-					.build();
+		final Runnable publisher = MeasurmentPublisher.influxDbPublisher(bme280::read,
+				WeatherStation::convertBME280Measurment, influxService, "weather");
 
-			influxService.write("weather", point);
-			LOG.debug("Wrote measurement {}", measurment);
-			Thread.sleep(3 * 1000);
-		}
+		scheduledThreadPool.scheduleAtFixedRate(publisher, 0, 3, TimeUnit.SECONDS);
+	}
+
+	private static Point convertBME280Measurment(final BME280Measurment measurment) {
+		final long timestamp = System.currentTimeMillis();
+		final Point point = Point.measurement("weather")
+				.time(timestamp, TimeUnit.MILLISECONDS)
+				.addField("temp", measurment.getTemp())
+				.addField("humidity", measurment.getHumidity())
+				.addField("pressure", measurment.getPressure())
+				.build();
+		return point;
 	}
 }
