@@ -43,17 +43,28 @@ remotes {
   }
 }
 
+ext.uploadDir = '/home/pi/weather'
+
 task deploy(dependsOn: shadowJar) {
   doLast {
     ssh.run {
       session(remotes.raspi) {
         def jarFile = shadowJar.outputs.files.singleFile
         def configFile = file('weather.properties')
-        def uploadDir = '/home/pi/weather'
         execute "mkdir -p $uploadDir"
         put from: jarFile, into: uploadDir
         put from: configFile, into: uploadDir
-        execute "cd $uploadDir && java -jar ${uploadDir}/${jarFile.name}"
+      }
+    }
+  }
+}
+
+task deployAndRun(dependsOn: deploy) {
+  doLast {
+    ssh.run {
+      session(remotes.raspi) {
+        def jarFileName = shadowJar.outputs.files.singleFileName
+        execute "cd $uploadDir && java -jar ${uploadDir}/${jarFileName}"
       }
     }
   }
