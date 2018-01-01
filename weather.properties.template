@@ -1,0 +1,7 @@
+influxdb.url = http://localhost:8086
+influxdb.user = 
+influxdb.password = 
+
+fritzbox.url = https://fritz.box
+fritzbox.user = user
+fritzbox.password = secret

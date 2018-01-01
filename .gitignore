@@ -4,3 +4,4 @@
 /bin
 /build
 /.settings/org.eclipse.buildship.core.prefs
+/weather.properties
