@@ -27,16 +27,16 @@ dependencies {
     compile 'com.pi4j:pi4j-core:1.1'
     compile 'org.influxdb:influxdb-java:2.8'
     compile 'com.github.kaklakariada:fritzbox-java-api:0.4.1'
-    compile 'org.slf4j:slf4j-api:1.7.22'
-    compile 'ch.qos.logback:logback-classic:1.1.8'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.1.0'
+    testCompile 'org.mockito:mockito-core:2.13.0'
 }
 
 remotes {
   raspi {
-    host = 'raspitouch'
+    host = '192.168.179.68'
     user = 'pi'
     identity = file("${System.getProperty('user.home')}/.ssh/id_rsa")
   }

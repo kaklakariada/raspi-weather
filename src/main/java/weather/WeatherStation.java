@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.influxdb.dto.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
@@ -12,11 +14,13 @@ import weather.sensor.BME280Measurment;
 import weather.upload.InfluxService;
 
 public class WeatherStation {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WeatherStation.class);
+
 	public static void main(String[] args) throws UnsupportedBusNumberException, IOException, InterruptedException {
 
 		final BME280 bme280 = BME280.create();
 		final InfluxService influxService = InfluxService.create();
-		influxService.createDatabase();
 
 		while (true) {
 			final long timestamp = System.currentTimeMillis();
@@ -29,8 +33,8 @@ public class WeatherStation {
 					.addField("pressure", measurment.getPressure())
 					.build();
 
-			influxService.write(point);
-			System.out.println(measurment);
+			influxService.write("weather", point);
+			LOG.debug("Wrote measurement {}", measurment);
 			Thread.sleep(3 * 1000);
 		}
 	}

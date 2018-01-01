@@ -1,15 +1,14 @@
 package weather.upload;
 
+import java.util.concurrent.TimeUnit;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDB.ConsistencyLevel;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
 public class InfluxService {
-
-	private static final String DATABASE_NAME = "weather";
-	private static final String RETENTIONPOLICY_NAME = "weatherRetentionPolicy";
+	private static final String DEFAULT_RETENTION_POLICY = "autogen";
 	private final InfluxDB influxDB;
 
 	InfluxService(InfluxDB influxDB) {
@@ -17,23 +16,15 @@ public class InfluxService {
 	}
 
 	public static InfluxService create() {
-		final InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086");
-		influxDB.enableGzip();
+		final InfluxDB influxDB = InfluxDBFactory.connect("http://localhost:8086")
+				.enableGzip()
+				.setConsistency(ConsistencyLevel.QUORUM)
+				.setDatabase(null)
+				.enableBatch(10, 10, TimeUnit.SECONDS);
 		return new InfluxService(influxDB);
 	}
 
-	public void createDatabase() {
-		influxDB.createDatabase(DATABASE_NAME);
-		influxDB.createRetentionPolicy(RETENTIONPOLICY_NAME, DATABASE_NAME, "30d", "30m", 2, true);
-	}
-
-	public void write(Point... points) {
-		final BatchPoints batchPoints = BatchPoints.database(DATABASE_NAME)
-				.tag("async", "true")
-				.retentionPolicy(RETENTIONPOLICY_NAME)
-				.consistency(ConsistencyLevel.ALL)
-				.points(points)
-				.build();
-		influxDB.write(batchPoints);
+	public void write(String database, Point point) {
+		influxDB.write(database, DEFAULT_RETENTION_POLICY, point);
 	}
 }
